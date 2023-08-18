@@ -2,16 +2,32 @@
 import { useState, useEffect } from "react";
 import PromptCard from "@components/PromptCard";
 
-const PromptCardList = ({ data, handleTagClick }) => {
-  return (
-    <div className="mt-16 prompt_layout">
-      {data.map((post) => (
+const PromptCardList = ({ data, handleTagClick,searchText   }) => {
+console.log(data,"data")
+  const filteredPosts = data.filter(item =>
+    (item.prompt && item.prompt.includes(searchText)) ||
+    (item.tag && item.tag.includes(searchText)) ||
+    (item.creator.username && item.creator.username.includes(searchText)) 
+  );
+
+  return ( 
+    <div className="mt-16 prompt_layout">  
+      {searchText ? (filteredPosts.map((post) => (
         <PromptCard
           key={post._id}
           post={post}
           handleTagClick={handleTagClick}
         />
-      ))}
+      ))):(
+        data.map((post) => (
+          <PromptCard
+            key={post._id}
+            post={post}
+            handleTagClick={handleTagClick}
+          />
+        ))
+      )
+      }
     </div>
   );
 };
@@ -19,7 +35,14 @@ const Feed = () => {
   const [searchText, setSearchText] = useState("");
   const [posts, setPosts] = useState([]);
 
-  const handleSearchChange = (e) => {};
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+  };
+
+  const handleTagClick = (tag) => {
+    setSearchText(tag);
+  };
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -29,6 +52,8 @@ const Feed = () => {
     };
     fetchPosts();
   }, []);
+
+
   return (
     <section className="feed">
       <form className="relative w-full flex-center">
@@ -41,7 +66,7 @@ const Feed = () => {
           className="search_input peer"
         />
       </form>
-      <PromptCardList data={posts} handleTagClick={() => {}} />
+      <PromptCardList setSearchText={setSearchText} searchText={searchText} data={posts} handleTagClick={handleTagClick} />
     </section>
   );
 };
